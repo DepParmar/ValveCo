@@ -1,7 +1,7 @@
 import React, { useState, useEffect, Suspense, useRef } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
 import { 
-  Menu, X, ArrowUpRight, Globe, Mail, Phone, 
+  Globe, Mail, Phone, 
   Settings, ShieldCheck, Factory, Wrench, 
   ChevronRight, ArrowRight, Play, Info,
   RotateCw, ZoomIn, Plus, Award, Send,
@@ -16,7 +16,10 @@ import {
 import * as THREE from 'three';
 import { Product, PageId } from './types';
 import { PRODUCTS, SERVICES, INDUSTRIES } from './constants';
-import logo from './assets/logo.png';
+import SiteHeader from './components/layout/SiteHeader';
+import NoiseOverlay from './components/layout/NoiseOverlay';
+import BackToTopButton from './components/layout/BackToTopButton';
+import NeonFooter from './components/layout/NeonFooter';
 
 // --- 3D Valve Components ---
 
@@ -712,140 +715,11 @@ function ValveViewer({ type, activeComponent, onComponentSelect, variant = 'defa
   );
 }
 
-// --- Noise Overlay ---
-function Noise() {
-  return (
-    <div className="fixed inset-0 z-[100] pointer-events-none opacity-[0.03] mix-blend-overlay">
-      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-        <filter id="noiseFilter">
-          <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" />
-        </filter>
-        <rect width="100%" height="100%" filter="url(#noiseFilter)" />
-      </svg>
-    </div>
-  );
-}
-
-// --- Back to Top Component ---
-function BackToTop() {
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const toggleVisibility = () => {
-      if (window.pageYOffset > 300) {
-        setIsVisible(true);
-      } else {
-        setIsVisible(false);
-      }
-    };
-
-    window.addEventListener('scroll', toggleVisibility);
-    return () => window.removeEventListener('scroll', toggleVisibility);
-  }, []);
-
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    });
-  };
-
-  return (
-    <AnimatePresence>
-      {isVisible && (
-        <motion.button
-          initial={{ opacity: 0, scale: 0.5, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.5, y: 20 }}
-          onClick={scrollToTop}
-          className="fixed bottom-10 right-10 z-[70] w-14 h-14 bg-primary text-white flex items-center justify-center rounded-full shadow-2xl shadow-primary/40 hover:bg-primary/90 transition-all group"
-        >
-          <ArrowUpRight size={24} className="group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />
-        </motion.button>
-      )}
-    </AnimatePresence>
-  );
-}
-
-// --- Main Application ---
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1, delayChildren: 0.2 },
-  },
-};
-
-const itemVariants = {
-  hidden: { y: 20, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: { duration: 0.8 },
-  },
-};
-
 export default function App() {
   const [activePage, setActivePage] = useState<PageId>('home');
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product>(PRODUCTS[0]);
   const [activeComponent, setActiveComponent] = useState<string | null>(null);
-  const [scrolled, setScrolled] = useState(false);
   const [isProductLoading, setIsProductLoading] = useState(false);
-  const [isNeonGlow, setIsNeonGlow] = useState(false);
-  const [isNeonFlicker, setIsNeonFlicker] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  useEffect(() => {
-    let isMounted = true;
-    let pulseTimeout: number | undefined;
-    let glowTimeout: number | undefined;
-    let flickerInterval: number | undefined;
-
-    const runPulse = () => {
-      if (!isMounted) return;
-
-      setIsNeonGlow(true);
-
-      const flickerCount = Math.floor(Math.random() * 3) + 2;
-      let currentFlicker = 0;
-
-      flickerInterval = window.setInterval(() => {
-        if (!isMounted) return;
-        setIsNeonFlicker((prev) => !prev);
-        currentFlicker += 1;
-
-        if (currentFlicker >= flickerCount) {
-          if (flickerInterval !== undefined) {
-            window.clearInterval(flickerInterval);
-          }
-          setIsNeonFlicker(false);
-        }
-      }, 70 + Math.random() * 80);
-
-      glowTimeout = window.setTimeout(() => {
-        if (!isMounted) return;
-        setIsNeonGlow(false);
-      }, 400 + Math.random() * 300);
-
-      pulseTimeout = window.setTimeout(runPulse, 2500 + Math.random() * 1000);
-    };
-
-    runPulse();
-
-    return () => {
-      isMounted = false;
-      if (pulseTimeout !== undefined) window.clearTimeout(pulseTimeout);
-      if (glowTimeout !== undefined) window.clearTimeout(glowTimeout);
-      if (flickerInterval !== undefined) window.clearInterval(flickerInterval);
-    };
-  }, []);
 
   const handleProductSelect = (p: Product) => {
     if (p.id === selectedProduct.id) return;
@@ -862,74 +736,14 @@ export default function App() {
 
   const navigateTo = (page: PageId) => {
     setActivePage(page);
-    setIsMenuOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-primary font-sans selection:bg-primary selection:text-white">
-      <Noise />
-      <BackToTop />
-      {/* Navigation */}
-      <nav className={`fixed top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-[1200px] z-50 transition-all duration-500 rounded-2xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.05)] ${
-        scrolled ? 'bg-white/40 backdrop-blur-2xl py-3' : 'bg-white/10 backdrop-blur-md py-4'
-      }`}>
-        <div className="px-6 flex items-center justify-between">
-          <button onClick={() => navigateTo('home')} className="flex items-center gap-2 group hover:opacity-80 active:scale-95 transition-all flex-1">
-            <div className="w-8 h-8 overflow-hidden rounded-sm bg-white/80 p-0.5 shadow-sm">
-              <img src={logo} alt="DAP Tech Sol logo" className="h-full w-full object-contain" />
-            </div>
-            <div className="font-display font-black uppercase italic tracking-tighter leading-none text-xl text-primary">
-              TVC.
-            </div>
-          </button>
-
-          <button className="flex-none text-primary ml-auto flex items-center gap-2 hover:text-primary/80 active:scale-90 transition-all" onClick={() => setIsMenuOpen(true)}>
-            <span className="font-mono text-xs font-bold uppercase tracking-widest hidden md:inline-block mr-2">Menu</span>
-            <Menu size={24} />
-          </button>
-        </div>
-      </nav>
-
-      {/* Half-Screen Drawer Menu */}
-      <AnimatePresence>
-        {isMenuOpen && (
-          <>
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsMenuOpen(false)}
-              className="fixed inset-0 z-[55] bg-black/40 backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ opacity: 0, x: '100%' }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 bottom-0 w-[85%] md:w-1/2 z-[60] bg-background flex flex-col justify-center items-center text-center gap-16 shadow-2xl shadow-black/50 border-l border-primary/10"
-            >
-              <button onClick={() => setIsMenuOpen(false)} className="absolute top-8 right-8 p-4 border border-primary/20 text-primary rounded-full hover:bg-primary hover:text-white hover:border-primary active:scale-90 transition-all">
-                <X size={20} />
-              </button>
-              <div className="flex flex-col gap-10">
-                {(['home', 'about', 'products', 'services', 'contact'] as PageId[]).map((id) => (
-                  <button
-                    key={id}
-                    onClick={() => navigateTo(id)}
-                    className="font-display text-4xl md:text-6xl font-black uppercase italic tracking-tighter text-primary hover:text-primary/60 active:scale-95 transition-all"
-                  >
-                    {id}
-                  </button>
-                ))}
-              </div>
-              <div className="absolute bottom-12 font-mono text-[10px] uppercase tracking-[0.4em] text-primary/30">
-                Precision Engineered in India
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      <NoiseOverlay />
+      <BackToTopButton />
+      <SiteHeader onNavigate={navigateTo} />
 
       <main className="flex-grow">
         <AnimatePresence mode="wait">
@@ -958,30 +772,7 @@ export default function App() {
         </AnimatePresence>
       </main>
 
-      <footer className="w-full bg-black px-6 py-12 text-center text-white md:py-14">
-        <p
-          className="mb-1 text-[clamp(1.25rem,3vw,2rem)] tracking-[0.05em]"
-          style={{ fontFamily: 'Sedgwick Ave Display, cursive' }}
-        >
-          With love from
-          <span
-            id="dapNeon"
-            className={`block select-none text-[clamp(3rem,10vw,5.5rem)] font-normal leading-[1.1] transition-[color,text-shadow,opacity] duration-200 ${isNeonFlicker ? 'opacity-60' : 'opacity-100'}`}
-            style={{
-              fontFamily: 'Sedgwick Ave Display, cursive',
-              color: isNeonGlow ? '#ff1e1e' : '#5a0f14',
-              textShadow: isNeonGlow
-                ? '0 0 4px rgba(255, 30, 30, 0.7), 0 0 10px rgba(255, 0, 0, 0.55), 0 0 18px rgba(180, 0, 0, 0.45)'
-                : 'none',
-            }}
-          >
-            DAP Tech Sol
-          </span>
-        </p>
-        <span className="mt-10 block text-[0.65rem] font-bold uppercase tracking-[0.3em] opacity-30">
-          © 2024 Thalichamchi Industries. All rights reserved.
-        </span>
-      </footer>
+      <NeonFooter />
     </div>
   );
 }
