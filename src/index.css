@@ -1,0 +1,113 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #FFFFFF;
+  --color-primary: #FF0000;
+  --color-secondary: #FFFFFF;
+  --color-accent: #FF0000;
+  --font-display: "Playfair Display", serif;
+  --font-sans: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-primary antialiased;
+    font-feature-settings: "ss01", "ss02", "cv01", "cv02";
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+  }
+}
+
+@layer components {
+  .section-tag {
+    @apply font-mono text-[10px] uppercase tracking-[0.8em] text-primary mb-8 block font-bold;
+  }
+
+  .section-title {
+    @apply font-display text-7xl md:text-[10rem] font-black italic uppercase leading-[0.85] tracking-tighter;
+  }
+
+  .text-gradient-primary {
+    @apply bg-clip-text text-transparent bg-gradient-to-br from-primary via-primary to-primary/40;
+  }
+
+  .btn-accent {
+    @apply bg-primary text-white font-mono uppercase tracking-[0.5em] font-bold transition-all hover:bg-white hover:text-primary hover:scale-105 active:scale-95 shadow-2xl shadow-primary/20;
+  }
+
+  .btn-stealth {
+    @apply border-2 border-primary/10 text-primary font-mono uppercase tracking-[0.5em] font-bold transition-all hover:bg-primary hover:text-white hover:border-primary active:scale-95;
+  }
+
+  .glass-card {
+    @apply bg-primary/[0.03] backdrop-blur-xl border border-primary/10 shadow-2xl;
+  }
+
+  .glass-panel {
+    @apply bg-white/40 backdrop-blur-2xl border border-primary/5;
+  }
+
+  .bento-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: minmax(200px, auto);
+    gap: 1.5rem;
+  }
+
+  .bento-item-large {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+
+  .bento-item-wide {
+    grid-column: span 2;
+  }
+
+  .bento-item-tall {
+    grid-row: span 2;
+  }
+
+  .vertical-rail {
+    @apply font-mono text-[10px] uppercase tracking-[0.8em] text-primary/20 [writing-mode:vertical-rl] rotate-180 font-bold;
+  }
+
+  .bg-mesh-primary {
+    background-image: radial-gradient(circle at 2px 2px, rgba(225, 29, 72, 0.15) 1px, transparent 0);
+    background-size: 40px 40px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    height: 4px;
+    width: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-primary/5;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-primary/40 hover:bg-primary transition-colors;
+  }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
