@@ -70,9 +70,6 @@ export default function NeonFooter() {
           DAP Tech Sol
         </span>
       </p>
-      <span className="mt-10 block text-[0.65rem] font-bold uppercase tracking-[0.3em] opacity-30">
-        © 2024 Thalichamchi Industries. All rights reserved.
-      </span>
     </footer>
   );
 }
